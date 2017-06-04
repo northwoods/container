@@ -15,8 +15,8 @@ class ContainerException extends RuntimeException implements
      *
      * @return static
      */
-    public static function couldNotMake($class, InjectorException $e)
+    public static function couldNotMake($class, InjectorException $previous)
     {
-        return new static("Could not make $class", 0, $e);
+        return new static("Could not make $class", 0, $previous);
     }
 }
