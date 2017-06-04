@@ -6,7 +6,7 @@
         "psr/container-implementation": "^1.0"
     },
     "require": {
-        "rdlowrey/auryn": "^1.0",
+        "rdlowrey/auryn": "^1.1",
         "psr/container": "^1.0"
     },
     "require-dev": {
