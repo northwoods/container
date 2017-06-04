@@ -11,13 +11,19 @@ use PHPUnit\Framework\TestCase;
 class InjectorContainerTest extends TestCase
 {
     /**
+     * @var Injector
+     */
+    private $injector;
+
+    /**
      * @var InjectorContainer
      */
     private $container;
 
     public function setUp()
     {
-        $this->container = new InjectorContainer(new Injector());
+        $this->injector = new Injector();
+        $this->container = new InjectorContainer($this->injector);
     }
 
     public function testContainer()
@@ -48,6 +54,17 @@ class InjectorContainerTest extends TestCase
             ClassWithoutParameters::class,
             $this->container->get(ClassWithoutParameters::class),
             'It gets instances of the same type.'
+        );
+    }
+
+    public function testGetAlias()
+    {
+        $this->injector->alias('service', ClassWithoutParameters::class);
+
+        $this->assertInstanceof(
+            ClassWithoutParameters::class,
+            $this->container->get('service'),
+            'It gets instances of aliases.'
         );
     }
 

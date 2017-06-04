@@ -35,6 +35,21 @@ class InjectorContainer implements ContainerInterface
     // ContainerInterface
     public function has($id)
     {
-        return class_exists($id);
+        return class_exists($id) || $this->hasAlias($id);
+    }
+
+    /**
+     * Check the injector has an alias
+     *
+     * @param string $id
+     *
+     * @return bool
+     */
+    private function hasAlias($id)
+    {
+        $type = Injector::I_ALIASES;
+        $details = $this->injector->inspect($id, $type);
+
+        return !empty($details[$type][$id]);
     }
 }
