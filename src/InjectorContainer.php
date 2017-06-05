@@ -8,6 +8,8 @@ use Psr\Container\ContainerInterface;
 
 class InjectorContainer implements ContainerInterface
 {
+    const I_ALL = 31;
+
     /**
      * @var Injector
      */
@@ -35,21 +37,20 @@ class InjectorContainer implements ContainerInterface
     // ContainerInterface
     public function has($id)
     {
-        return class_exists($id) || $this->hasAlias($id);
+        return class_exists($id) || $this->hasReference($id);
     }
 
     /**
-     * Check the injector has an alias
+     * Check the injector has a reference
      *
      * @param string $id
      *
      * @return bool
      */
-    private function hasAlias($id)
+    private function hasReference($id)
     {
-        $type = Injector::I_ALIASES;
-        $details = $this->injector->inspect($id, $type);
-
-        return !empty($details[$type][$id]);
+        // https://github.com/rdlowrey/auryn/issues/157
+        $details = $this->injector->inspect($id, self::I_ALL);
+        return (bool) array_filter($details);
     }
 }
