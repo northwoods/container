@@ -49,6 +49,82 @@ $injector->alias(ContainerInterface::class, InjectorContainer::class);
 $injector->define(InjectorContainer::class, [':injector' => $injector]);
 ```
 
+### Configuration
+
+This package provides a `InjectorBuilder` that can be used to configure Auryn using separate classes.
+The builder takes a list of configuration objects and applies each of them to the injector.
+
+First, create an implementation of `InjectorConfig`:
+
+```php
+namespace Acme;
+
+use Auryn\Injector;
+use Northwoods\Container\InjectorConfig;
+use Northwoods\Container\InjectorContainer;
+use Psr\Container\ContainerInterface;
+
+class ContainerConfig implements InjectorConfig
+{
+    public function apply(Injector $injector)
+    {
+        // Optional: Declare a single container instance.
+        $injector->share(ContainerInterface::class);
+
+        // Use InjectorContainer as the implementation of ContainerInterface.
+        $injector->alias(ContainerInterface::class, InjectorContainer::class);
+
+        // InjectorContainer will wrap this Injector instance.
+        $injector->define(InjectorContainer::class, [':injector' => $injector]);
+    }
+}
+```
+
+_**Note: This exact configuration is available in `Northwoods\Container\Config\ContainerConfig`.**_
+
+And then use it to create the injector:
+
+```php
+use Acme\ContainerConfig;
+use Northwoods\Container\InjectorBuilder;
+
+$builder = new InjectorBuilder([
+    new ContainerConfig(),
+]);
+
+$injector = $builder->build();
+$container = $injector->make(ContainerInterface::class);
+```
+
+_**Note: An instance of Auryn can also be provided by calling `build($injector)`.**_
+
+### Service Definitions
+
+This package also includes a `ServiceConfig` class that supports applying a "service definition" map
+in the [Zend Service Manager][zend-service-manager] style:
+
+```php
+use Northwoods\Container\InjectorBuilder;
+use Northwoods\Container\Config;
+
+$builder = new InjectorBuilder([
+    new Config\ContainerConfig(),
+    new Config\ServiceConfig(require '/path/to/services.php'),
+]);
+
+$injector = $builder->build();
+```
+
+[zend-service-manager]: https://docs.zendframework.com/zend-servicemanager/configuring-the-service-manager/
+
+The following definitions are supported by `ServiceConfig`:
+
+- `aliases` will be aliased
+- `delegators` will create a chained prepare
+- `factories` will create a delegate
+- `invokables` will be aliased
+- `services` will be wrapped as a delegate
+
 ### Identifiers
 
 [PSR-11][psr-11] does not require the container identifier to be a class name, while [Auryn][auryn] does.
@@ -58,32 +134,23 @@ These container "service names" must resolve to a class and will need to be alia
 [auryn-class-alias]: https://github.com/rdlowrey/auryn#type-hint-aliasing
 
 For example a package may require a `config` entry in the container that is meant to resolve to an array.
-This can be achieved by creating a class that extends `ArrayObject` or implements `ArrayAccess`:
+This can be achieved by creating a delegate that creates an instance of `ArrayObject`:
 
 ```php
-namespace Acme;
-
-class Configuration extends \ArrayObject {}
-```
-
-And then aliasing as `config` for the container:
-
-```php
-use Acme\Configuration;
+use ArrayObject;
 use Auryn\Injector;
 use Northwoods\Container\InjectorContainer;
 
-// Create an alias to the class that acts as an array
-$injector->alias('config', Configuration::class);
-
-// Optional: Share an instance of Configuration globally
-$injector->share(Configuration::class);
+// Share a global "config" array as an object
+$injector->share('config')->delegate('config', function () {
+    return new ArrayObject(require '/path/to/config.php');
+});
 
 // Create the container
 $container = new InjectorContainer($injector);
 ```
 
-Now whenever `$container->get('config')` is called the `Configuration` instance will be returned.
+Now whenever `$container->get('config')` is called the `ArrayObject` will be returned.
 
 ### Examples
 

@@ -10,7 +10,8 @@
         "psr/container": "^1.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "^5.7"
+        "phpunit/phpunit": "^5.7",
+        "eloquent/phony-phpunit": "^1.0"
     },
     "autoload": {
         "psr-4": {
