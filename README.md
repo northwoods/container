@@ -124,6 +124,8 @@ The following definitions are supported by `ServiceConfig`:
 - `factories` will create a delegate
 - `invokables` will be aliased
 - `services` will be wrapped as a delegate
+- `shared` will enable (or disable) sharing of specific classes
+- `shared_by_default` will enable (or disable) sharing by default
 
 ### Identifiers
 

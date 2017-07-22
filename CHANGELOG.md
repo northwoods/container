@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.2.0]
+
+### Added
+
+- `ServiceConfig` now shares instances by default and supports the `shared` and `shared_by_default` options
+
 ## [1.1.0]
 
 ### Added
