@@ -14,7 +14,10 @@ use Psr\Container\ContainerInterface;
 
 class ServiceConfigTest extends TestCase
 {
-    public function testConfig()
+    /**
+     * @dataProvider dataConfig
+     */
+    public function testConfig(array $modifications, array $shared)
     {
         $services = [
             'aliases' => [
@@ -41,6 +44,8 @@ class ServiceConfigTest extends TestCase
                 ServiceConfigTest::class => $this,
             ],
         ];
+
+        $services = array_replace($services, $modifications);
 
         // Mock
         $container = Phony::mock(ContainerInterface::class);
@@ -83,5 +88,83 @@ class ServiceConfigTest extends TestCase
             $injector->make(ServiceConfigTest::class),
             'It handles services.'
         );
+
+        // Verify sharing configuration
+        array_map(
+            function ($identifier) use ($injector, $shared) {
+                if (in_array($identifier, $shared)) {
+                    $this->assertSame(
+                        $injector->make($identifier),
+                        $injector->make($identifier),
+                        "$identifier should be shared."
+                    );
+                } else {
+                    $this->assertNotSame(
+                        $injector->make($identifier),
+                        $injector->make($identifier),
+                        "$identifier should not be shared."
+                    );
+                }
+            },
+            [
+                'i',
+                PreparedClass::class,
+                DelegatedClass::class,
+                InvokableClass::class,
+                ServiceConfigTest::class,
+            ]
+        );
+    }
+
+    public function dataConfig()
+    {
+        return [
+            // modifications, shared
+            'all shared by default' => [
+                [], 
+                [
+                    'i',
+                    PreparedClass::class,
+                    DelegatedClass::class,
+                    InvokableClass::class,
+                    ServiceConfigTest::class,
+                ],
+            ],
+            'none shared by default' => [
+                [
+                    'shared_by_default' => false,
+                ],
+                [
+                    // Services are always shared because they are instances!
+                    ServiceConfigTest::class,
+                ],
+            ],
+            'some disabled shared' => [
+                [
+                    'shared' => [
+                        DelegatedClass::class => false,
+                        InvokableClass::class => false,
+                    ],
+                ],
+                [
+                    PreparedClass::class,
+                    // Services are always shared because they are instances!
+                    ServiceConfigTest::class,
+                ],
+            ],
+            'some enabled shared' => [
+                [
+                    'shared_by_default' => false,
+                    'shared' => [
+                        DelegatedClass::class => true,
+                    ],
+                ],
+                [
+                    DelegatedClass::class,
+                    // Services are always shared because they are instances!
+                    ServiceConfigTest::class,
+                ],
+            ]
+        ];
     }
 }

@@ -13,6 +13,16 @@ class ServiceConfig implements InjectorConfig
      */
     private $config;
 
+    /**
+     * @var bool
+     */
+    private $sharedByDefault = true;
+
+    /**
+     * @var array
+     */
+    private $shared = [];
+
     public function __construct(array $config)
     {
         $this->config = $config;
@@ -24,13 +34,23 @@ class ServiceConfig implements InjectorConfig
      */
     public function apply(Injector $injector)
     {
+        // Enable or disable sharing all services by default.
+        if (isset($this->config['shared_by_default'])) {
+            $this->sharedByDefault = (bool) $this->config['shared_by_default'];
+        }
+
+        // Overload specific services to be shared.
+        if (isset($this->config['shared'])) {
+            $this->shared = $this->config['shared'];
+        }
+
         // Aliases are exactly the same as aliases. Natch.
         if (isset($this->config['aliases'])) {
             $this->applyAliases($injector, $this->config['aliases']);
         }
 
+        // Delegators are effectively a chain of prepare() statements.
         if (isset($this->config['delegators'])) {
-            // Delegators are effectively a chain of prepare() statements.
             $this->applyDelegators($injector, $this->config['delegators']);
         }
 
@@ -53,6 +73,19 @@ class ServiceConfig implements InjectorConfig
     }
 
     /**
+     * @param string $name
+     * @return bool
+     */
+    private function isShared($name)
+    {
+        if (isset($this->shared[$name])) {
+            return (bool) $this->shared[$name];
+        }
+
+        return $this->sharedByDefault;
+    }
+
+    /**
      * @param array $services
      * @return void
      */
@@ -60,6 +93,9 @@ class ServiceConfig implements InjectorConfig
     {
         foreach ($services as $name => $object) {
             $injector->alias($name, $object);
+            if ($this->isShared($name)) {
+                $injector->share($name);
+            }
         }
     }
 
@@ -71,6 +107,9 @@ class ServiceConfig implements InjectorConfig
     {
         foreach ($services as $name => $object) {
             $injector->delegate($name, $object);
+            if ($this->isShared($name)) {
+                $injector->share($name);
+            }
         }
     }
 
@@ -83,6 +122,9 @@ class ServiceConfig implements InjectorConfig
         // https://github.com/rdlowrey/auryn#prepares-and-setter-injection
         foreach ($delegators as $service => $prepares) {
             $injector->prepare($service, $this->createDelegator($service, $prepares));
+            if ($this->isShared($service)) {
+                $injector->share($service);
+            }
         }
     }
 
