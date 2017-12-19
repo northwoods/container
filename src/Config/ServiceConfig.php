@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Northwoods\Container\Config;
 
@@ -8,19 +9,13 @@ use Psr\Container\ContainerInterface;
 
 class ServiceConfig implements InjectorConfig
 {
-    /**
-     * @var array
-     */
+    /** @var array */
     private $config;
 
-    /**
-     * @var bool
-     */
+    /** @var bool */
     private $sharedByDefault = true;
 
-    /**
-     * @var array
-     */
+    /** @var array */
     private $shared = [];
 
     public function __construct(array $config)
@@ -28,11 +23,8 @@ class ServiceConfig implements InjectorConfig
         $this->config = $config;
     }
 
-    /**
-     * @param Injector $injector
-     * @return void
-     */
-    public function apply(Injector $injector)
+    // InjectorConfig
+    public function apply(Injector $injector): void
     {
         // Enable or disable sharing all services by default.
         if (isset($this->config['shared_by_default'])) {
@@ -72,11 +64,7 @@ class ServiceConfig implements InjectorConfig
         }
     }
 
-    /**
-     * @param string $name
-     * @return bool
-     */
-    private function isShared($name)
+    private function isShared(string $name): bool
     {
         if (isset($this->shared[$name])) {
             return (bool) $this->shared[$name];
@@ -85,11 +73,7 @@ class ServiceConfig implements InjectorConfig
         return $this->sharedByDefault;
     }
 
-    /**
-     * @param array $services
-     * @return void
-     */
-    private function applyAliases(Injector $injector, array $services)
+    private function applyAliases(Injector $injector, array $services): void
     {
         foreach ($services as $name => $object) {
             $injector->alias($name, $object);
@@ -99,11 +83,7 @@ class ServiceConfig implements InjectorConfig
         }
     }
 
-    /**
-     * @param array $services
-     * @return void
-     */
-    private function applyDelegates(Injector $injector, array $services)
+    private function applyDelegates(Injector $injector, array $services): void
     {
         foreach ($services as $name => $object) {
             $injector->delegate($name, $object);
@@ -113,11 +93,7 @@ class ServiceConfig implements InjectorConfig
         }
     }
 
-    /**
-     * @param array $delegators
-     * @return void
-     */
-    private function applyDelegators(Injector $injector, array $delegators)
+    private function applyDelegators(Injector $injector, array $delegators): void
     {
         // https://github.com/rdlowrey/auryn#prepares-and-setter-injection
         foreach ($delegators as $service => $prepares) {
@@ -129,27 +105,20 @@ class ServiceConfig implements InjectorConfig
     }
 
     /**
-     * Create a chained prepare()
-     *
-     * @param string $service
-     * @param string[] $delegators
-     * @return callable
+     * Create a chained prepare function.
      */
-    private function createDelegator($service, array $delegators)
+    private function createDelegator(string $service, array $delegators): callable
     {
         // Prepare the service by calling each delegator with the result of the previous.
-        return function ($instance, $injector) use ($service, $delegators) {
+        return function ($instance, Injector $injector) use ($service, $delegators) {
             return array_reduce($delegators, $this->delegatorReducer($injector, $service), $instance);
         };
     }
 
     /**
-     * Create a reducer for a chained prepare()
-     *
-     * @param string $service
-     * @return callable
+     * Create a reducer for a chained prepare function.
      */
-    private function delegatorReducer(Injector $injector, $service)
+    private function delegatorReducer(Injector $injector, string $service): callable
     {
         // https://docs.zendframework.com/zend-expressive/features/container/delegator-factories/
         return function ($instance, $delegator) use ($injector, $service) {
@@ -162,14 +131,9 @@ class ServiceConfig implements InjectorConfig
     }
 
     /**
-     * Curry the delegator to only require a container
-     *
-     * @param callable $delegator that will be ultimately called
-     * @param string $service name of service being prepared
-     * @param callable $callable that returns the instance
-     * @return callable
+     * Curry the delegator to only require a container.
      */
-    private function curryDelegator(callable $delegator, $service, callable $callable)
+    private function curryDelegator(callable $delegator, string $service, callable $callable): callable
     {
         return static function (ContainerInterface $container) use ($delegator, $service, $callable) {
             return $delegator($container, $service, $callable);
@@ -177,14 +141,9 @@ class ServiceConfig implements InjectorConfig
     }
 
     /**
-     * Returns a function that always returns the same value
-     *
-     * Also known as a "kestrel" or "k combinator".
-     *
-     * @param mixed $x
-     * @return callable
+     * Create a k combinator for a value.
      */
-    private function k($x)
+    private function k($x): callable
     {
         return static function () use ($x) {
             return $x;
@@ -192,13 +151,12 @@ class ServiceConfig implements InjectorConfig
     }
 
     /**
-     * @param array $values
-     * @return callable[]
+     * Create k combinators for multiple values.
      */
-    private function kAll(array $values)
+    private function kAll(array $values): array
     {
         return array_map(
-            function ($x) {
+            function ($x): callable {
                 return $this->k($x);
             },
             $values

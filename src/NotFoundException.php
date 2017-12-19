@@ -1,19 +1,14 @@
 <?php
+declare(strict_types=1);
 
 namespace Northwoods\Container;
 
-use InvalidArgumentException;
 use Psr\Container\NotFoundExceptionInterface;
 
-class NotFoundException extends InvalidArgumentException implements
+class NotFoundException extends \InvalidArgumentException implements
     NotFoundExceptionInterface
 {
-    /**
-     * @param string $class
-     *
-     * @return static
-     */
-    public static function classDoesNotExist($class)
+    public static function classDoesNotExist(string $class): NotFoundException
     {
         return new static("Class $class does not exist");
     }

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Northwoods\Container\Config;
 
@@ -9,15 +10,15 @@ use Psr\Container\ContainerInterface;
 
 class ContainerConfig implements InjectorConfig
 {
-    public function apply(Injector $injector)
+    public function apply(Injector $injector): void
     {
-        // Optional: Declare a single container instance.
+        // Assume that the container will be shared
         $injector->share(ContainerInterface::class);
 
-        // Use InjectorContainer as the implementation of ContainerInterface.
+        // Use the injector as the preferred container implementation
         $injector->alias(ContainerInterface::class, InjectorContainer::class);
 
-        // InjectorContainer will wrap this Injector instance.
+        // The container will wrap this injector
         $injector->define(InjectorContainer::class, [':injector' => $injector]);
     }
 }
