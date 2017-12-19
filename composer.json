@@ -2,7 +2,7 @@
     "name": "northwoods/container",
     "description": "Container wrapper for Auryn dependency injector",
     "type": "library",
-    "provides": {
+    "provide": {
         "psr/container-implementation": "^1.0"
     },
     "require": {
