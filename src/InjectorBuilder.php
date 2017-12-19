@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Northwoods\Container;
 
@@ -6,9 +7,7 @@ use Auryn\Injector;
 
 class InjectorBuilder
 {
-    /**
-     * @var InjectorConfig[]
-     */
+    /** @var InjectorConfig[] */
     private $configs;
 
     /**
@@ -20,11 +19,9 @@ class InjectorBuilder
     }
 
     /**
-     * Build the injector using the provided configuration
-     *
-     * @return Injector
+     * Build the injector using the provided configuration.
      */
-    public function build(Injector $injector = null)
+    public function build(Injector $injector = null): Injector
     {
         if (empty($injector)) {
             $injector = new Injector();
@@ -36,10 +33,7 @@ class InjectorBuilder
         return $injector;
     }
 
-    /**
-     * @return callable
-     */
-    private function applicator(Injector $injector)
+    private function applicator(Injector $injector): callable
     {
         return static function (InjectorConfig $config) use ($injector) {
             return $config->apply($injector);

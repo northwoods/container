@@ -80,7 +80,7 @@ class InjectorContainerTest extends TestCase
 
         $this->expectException(NotFoundException::class);
 
-        $x = $this->container->get(ClassThatDoesNotExist::class);
+        $this->container->get(ClassThatDoesNotExist::class);
     }
 
     public function testGetFailure()
@@ -95,6 +95,6 @@ class InjectorContainerTest extends TestCase
 
         $this->expectException(ContainerException::class);
 
-        $x = $this->container->get(ClassWithParameters::class);
+        $this->container->get(ClassWithParameters::class);
     }
 }

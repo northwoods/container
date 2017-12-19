@@ -6,12 +6,12 @@
         "psr/container-implementation": "^1.0"
     },
     "require": {
+        "php": ">=7.1",
         "rdlowrey/auryn": "^1.1",
         "psr/container": "^1.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "^5.7",
-        "eloquent/phony-phpunit": "^1.0"
+        "eloquent/phony-phpunit": "^3.0"
     },
     "autoload": {
         "psr-4": {

@@ -28,7 +28,7 @@ class InjectorBuilderTest extends TestCase
         ];
 
         // Execute
-        $builder = new InjectorBuilder([$a->get(), $b->get()]);
+        $builder = new InjectorBuilder($configs);
         $injector = $builder->build();
 
         // Verify
