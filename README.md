@@ -54,49 +54,34 @@ $injector->define(InjectorContainer::class, [':injector' => $injector]);
 This package provides a `InjectorBuilder` that can be used to configure Auryn using separate classes.
 The builder takes a list of configuration objects and applies each of them to the injector.
 
-First, create an implementation of `InjectorConfig`:
-
 ```php
-namespace Acme;
-
-use Auryn\Injector;
-use Northwoods\Container\InjectorConfig;
-use Northwoods\Container\InjectorContainer;
-use Psr\Container\ContainerInterface;
-
-class ContainerConfig implements InjectorConfig
-{
-    public function apply(Injector $injector)
-    {
-        // Optional: Declare a single container instance.
-        $injector->share(ContainerInterface::class);
-
-        // Use InjectorContainer as the implementation of ContainerInterface.
-        $injector->alias(ContainerInterface::class, InjectorContainer::class);
-
-        // InjectorContainer will wrap this Injector instance.
-        $injector->define(InjectorContainer::class, [':injector' => $injector]);
-    }
-}
-```
-
-_**Note: This exact configuration is available in `Northwoods\Container\Config\ContainerConfig`.**_
-
-And then use it to create the injector:
-
-```php
-use Acme\ContainerConfig;
+use Northwoods\Container\Config\ContainerConfig;
 use Northwoods\Container\InjectorBuilder;
 
 $builder = new InjectorBuilder([
     new ContainerConfig(),
 ]);
+```
 
+If you prefer to have the injector instantiate the configuration classes, use the `LazyInjectorBuilder`:
+
+```php
+use Northwoods\Container\Config\ContainerConfig;
+use Northwoods\Container\LazyInjectorBuilder;
+
+$builder = new LazyInjectorBuilder([
+    ContainerConfig::class,
+]);
+```
+
+The builder can then be used to create an `Injector` instance:
+
+```php
 $injector = $builder->build();
 $container = $injector->make(ContainerInterface::class);
 ```
 
-_**Note: An instance of Auryn can also be provided by calling `build($injector)`.**_
+_**Note: An existing instance of Auryn can also be provided to the `build()` method.**_
 
 ### Service Definitions
 
