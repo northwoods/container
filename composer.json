@@ -1,8 +1,18 @@
 {
     "name": "northwoods/container",
     "description": "Container wrapper for Auryn dependency injector",
-    "type": "library",
     "license": "MIT",
+    "keywords": [
+        "auyrn",
+        "container",
+        "psr-11"
+    ],
+    "repositories": [
+        {
+            "type": "git",
+            "url": "https://github.com/shadowhand/zend-container-config-test"
+        }
+    ],
     "provide": {
         "psr/container-implementation": "^1.0"
     },
@@ -14,7 +24,8 @@
     "require-dev": {
         "eloquent/phony-phpunit": "^4.0",
         "phpunit/phpunit": "^7.0.3",
-        "squizlabs/php_codesniffer": "^3.2"
+        "squizlabs/php_codesniffer": "^3.2",
+        "zendframework/zend-container-config-test": "dev-fix/factory-test-return"
     },
     "autoload": {
         "psr-4": {
