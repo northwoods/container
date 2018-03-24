@@ -121,7 +121,7 @@ class ServiceConfigTest extends TestCase
         return [
             // modifications, shared
             'all shared by default' => [
-                [], 
+                [],
                 [
                     'i',
                     PreparedClass::class,
