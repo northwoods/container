@@ -45,7 +45,7 @@ class Config implements InjectorConfig
         foreach ($aliases as $alias => $target) {
             // Standard Auryn aliases do not work when chained. Work around by
             // lazily fetching the shared target from the container.
-            $injector->share($alias)->share($target)->delegate($alias, $this->makeLazy($target));
+            $injector->share($alias)->share($target)->delegate($alias, $this->makeContainerGet($target));
         }
     }
 
@@ -53,11 +53,7 @@ class Config implements InjectorConfig
     {
         $factories = $dependencies['factories'] ?? [];
         foreach ($factories as $name => $factory) {
-            $delegate = function () use ($injector, $name, $factory) {
-                $container = $injector->make(ContainerInterface::class);
-                $factory = $this->makeFactory($name, $factory);
-                return $factory($container, $name);
-            };
+            $delegate = $this->makeFactory($injector, $name, $factory);
             if (isset($dependencies['delegators'][$name])) {
                 $delegate = $this->makeDelegator(
                     $injector,
@@ -77,9 +73,7 @@ class Config implements InjectorConfig
             if (is_string($alias) && $alias !== $invokable) {
                 $injector->alias($alias, $invokable);
             }
-            $delegate = function () use ($invokable) {
-                return $this->makeFactory($invokable, $invokable);
-            };
+            $delegate = $this->makeLazyInvokable($invokable, $invokable);
             if (isset($dependencies['delegators'][$invokable])) {
                 $delegate = $this->makeDelegator(
                     $injector,
@@ -102,10 +96,10 @@ class Config implements InjectorConfig
 
     private function makeDelegator(Injector $injector, string $name, callable $callback, array $delegators): callable
     {
-        return function () use ($injector, $name, $callback, $delegators) {
+        return /** @return object */ function () use ($injector, $name, $callback, $delegators) {
             foreach ($delegators as $delegator) {
                 $container = $injector->make(ContainerInterface::class);
-                $delegator = $this->makeFactory($name, $delegator);
+                $delegator = $this->makeInvokable($name, $delegator);
                 $instance = $delegator($container, $name, $callback);
                 $callback = $this->makeIdentity($instance);
             }
@@ -113,16 +107,46 @@ class Config implements InjectorConfig
         };
     }
 
+    private function makeContainerGet(string $name): callable
+    {
+        return /** @return object */ static function (ContainerInterface $container) use ($name) {
+            return $container->get($name);
+        };
+    }
+
     /**
      * @param string|callable $factory
      */
-    private function makeFactory(string $name, $factory): callable
+    private function makeFactory(Injector $injector, string $name, $factory): callable
+    {
+        return /** @return object */ function () use ($injector, $name, $factory) {
+            $container = $injector->make(ContainerInterface::class);
+            $factory = $this->makeInvokable($name, $factory);
+            return $factory($container, $name);
+        };
+    }
+
+    /**
+     * @param object $object
+     */
+    private function makeIdentity($object): callable
+    {
+        return /** @return object */ static function () use ($object) {
+            return $object;
+        };
+    }
+
+    /**
+     * @param string|callable $factory
+     * @throws ContainerException if the factory cannot be made invokable
+     */
+    private function makeInvokable(string $name, $factory): callable
     {
         if (is_callable($factory)) {
             return $factory;
         }
 
-        if (is_string($factory) && !class_exists($factory)) {
+        if (!class_exists($factory)) {
             throw ContainerException::expectedInvokable($name);
         }
 
@@ -135,17 +159,13 @@ class Config implements InjectorConfig
         throw ContainerException::expectedInvokable($name);
     }
 
-    private function makeIdentity($object): callable
+    /**
+     * @param string|callable $factory
+     */
+    private function makeLazyInvokable(string $name, $factory): callable
     {
-        return static function () use ($object) {
-            return $object;
-        };
-    }
-
-    private function makeLazy(string $name): callable
-    {
-        return static function (ContainerInterface $container) use ($name) {
-            return $container->get($name);
+        return /** @return callable */ function () use ($name, $factory) {
+            return $this->makeInvokable($name, $factory);
         };
     }
 }

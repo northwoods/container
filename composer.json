@@ -25,6 +25,7 @@
         "eloquent/phony-phpunit": "^4.0",
         "phpunit/phpunit": "^7.0.3",
         "squizlabs/php_codesniffer": "^3.2",
+        "vimeo/psalm": "^1.0.5",
         "zendframework/zend-container-config-test": "dev-fix/factory-test-return"
     },
     "autoload": {
@@ -38,7 +39,12 @@
         }
     },
     "scripts": {
-        "check": "phpcs --standard=PSR2 src/ tests/",
+        "check": [
+            "@cs-check",
+            "@sa-check"
+        ],
+        "cs-check": "phpcs --standard=PSR2 src/ tests/",
+        "sa-check": "psalm",
         "test": "phpunit"
     },
     "config": {
