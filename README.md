@@ -85,7 +85,7 @@ _**Note:** An existing instance of Auryn can also be provided to the `build()` m
 
 ### Zend Service Manager Compatibility
 
-This package is compatible with [Zend Service Manager][zend-service-manager]:
+This package is compatible with [Zend Expressive Container Config][zend-container]:
 
 ```php
 use Northwoods\Container\Zend\Config;
@@ -100,7 +100,7 @@ $container = $factory(new Config(
 
 _**Note:** All injections configured this way will be shared!_
 
-[zend-service-manager]: https://docs.zendframework.com/zend-servicemanager/configuring-the-service-manager/
+[zend-container]: https://docs.zendframework.com/zend-expressive/v3/features/container/config/
 
 ### Identifiers
 

@@ -14,9 +14,6 @@ class Config implements InjectorConfig
     /** @var array */
     private $config;
 
-    /** @var bool */
-    private $sharedByDefault = true;
-
     public function __construct(array $config)
     {
         $this->config = $config;
@@ -146,17 +143,15 @@ class Config implements InjectorConfig
             return $factory;
         }
 
-        if (!class_exists($factory)) {
+        if ($this->isValidClass($factory)) {
+            $factory = new $factory();
+        }
+
+        if (is_callable($factory) === false) {
             throw ContainerException::expectedInvokable($name);
         }
 
-        $factory = new $factory();
-
-        if (is_callable($factory)) {
-            return $factory;
-        }
-
-        throw ContainerException::expectedInvokable($name);
+        return $factory;
     }
 
     /**
@@ -167,5 +162,13 @@ class Config implements InjectorConfig
         return /** @return callable */ function () use ($name, $factory) {
             return $this->makeInvokable($name, $factory);
         };
+    }
+
+    /**
+     * @param mixed $factory
+     */
+    private function isValidClass($factory): bool
+    {
+        return is_string($factory) && class_exists($factory);
     }
 }

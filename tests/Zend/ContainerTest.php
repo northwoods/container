@@ -7,12 +7,10 @@ use Auryn\Injector;
 use Northwoods\Container\InjectorConfig;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
-use Zend\ContainerConfigTest as ZendTest;
+use Zend\ContainerConfigTest\AbstractExpressiveContainerConfigTest;
 
-class ContainerTest extends TestCase
+class ContainerTest extends AbstractExpressiveContainerConfigTest
 {
-    use ZendTest\AllTestTrait;
-
     protected function createContainer(array $config): ContainerInterface
     {
         $factory = new ContainerFactory();
