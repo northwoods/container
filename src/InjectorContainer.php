@@ -22,7 +22,7 @@ class InjectorContainer implements ContainerInterface
     // ContainerInterface
     public function get($id)
     {
-        if (false === $this->has($id)) {
+        if ($this->has($id) === false) {
             throw NotFoundException::classDoesNotExist($id);
         }
 
@@ -36,7 +36,7 @@ class InjectorContainer implements ContainerInterface
     // ContainerInterface
     public function has($id)
     {
-        return class_exists($id) || $this->hasReference($id);
+        return is_string($id) && (class_exists($id) || $this->hasReference($id));
     }
 
     private function hasReference(string $id): bool
