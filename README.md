@@ -81,36 +81,26 @@ $injector = $builder->build();
 $container = $injector->make(ContainerInterface::class);
 ```
 
-_**Note: An existing instance of Auryn can also be provided to the `build()` method.**_
+_**Note:** An existing instance of Auryn can also be provided to the `build()` method._
 
-### Service Definitions
+### Zend Service Manager Compatibility
 
-This package also includes a `ServiceConfig` class that supports applying a "service definition" map
-in the [Zend Service Manager][zend-service-manager] style:
+This package is compatible with [Zend Expressive Container Config][zend-container]:
 
 ```php
-use Northwoods\Container\InjectorBuilder;
-use Northwoods\Container\Config;
+use Northwoods\Container\Zend\Config;
+use Northwoods\Container\Zend\ContainerFactory;
 
-$builder = new InjectorBuilder([
-    new Config\ContainerConfig(),
-    new Config\ServiceConfig(require '/path/to/services.php'),
-]);
+$factory = new ContainerFactory();
 
-$injector = $builder->build();
+$container = $factory(new Config(
+    require 'path/to/services.php',
+));
 ```
 
-[zend-service-manager]: https://docs.zendframework.com/zend-servicemanager/configuring-the-service-manager/
+_**Note:** All injections configured this way will be shared!_
 
-The following definitions are supported by `ServiceConfig`:
-
-- `aliases` will be aliased
-- `delegators` will create a chained prepare
-- `factories` will create a delegate
-- `invokables` will be aliased
-- `services` will be wrapped as a delegate
-- `shared` will enable (or disable) sharing of specific classes
-- `shared_by_default` will enable (or disable) sharing by default
+[zend-container]: https://docs.zendframework.com/zend-expressive/v3/features/container/config/
 
 ### Identifiers
 
@@ -130,7 +120,7 @@ use Northwoods\Container\InjectorContainer;
 
 // Share a global "config" array as an object
 $injector->share('config')->delegate('config', function () {
-    return new ArrayObject(require '/path/to/config.php');
+    return new ArrayObject(require 'path/to/config.php');
 });
 
 // Create the container

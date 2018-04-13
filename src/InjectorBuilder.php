@@ -23,20 +23,14 @@ class InjectorBuilder
      */
     public function build(Injector $injector = null): Injector
     {
-        if (empty($injector)) {
+        if ($injector === null) {
             $injector = new Injector();
         }
 
-        // Apply configuration to the injector
-        array_map($this->applicator($injector), $this->configs);
+        foreach ($this->configs as $config) {
+            $config->apply($injector);
+        }
 
         return $injector;
-    }
-
-    private function applicator(Injector $injector): callable
-    {
-        return static function (InjectorConfig $config) use ($injector) {
-            return $config->apply($injector);
-        };
     }
 }

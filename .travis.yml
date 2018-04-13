@@ -24,6 +24,7 @@ install:
   - if [[ $MINIMUM_VERSIONS = true ]]; then composer update --no-interaction --prefer-lowest; fi
 
 script:
+  - composer check
   - composer test
 
 after_script:
