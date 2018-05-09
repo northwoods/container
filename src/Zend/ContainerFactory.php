@@ -10,15 +10,22 @@ use Psr\Container\ContainerInterface;
 
 class ContainerFactory
 {
+    /** @var Injector */
+    private $injector;
+
+    public function __construct(Injector $injector = null)
+    {
+        $this->injector = $injector ?? new Injector();
+    }
+
     public function __invoke(InjectorConfig $config): ContainerInterface
     {
-        $injector = new Injector();
-        $container = new InjectorContainer($injector);
+        $container = new InjectorContainer($this->injector);
 
-        $config->apply($injector);
+        $config->apply($this->injector);
 
-        $injector->share($container);
-        $injector->alias(ContainerInterface::class, InjectorContainer::class);
+        $this->injector->share($container);
+        $this->injector->alias(ContainerInterface::class, InjectorContainer::class);
 
         return $container;
     }

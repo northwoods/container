@@ -102,6 +102,15 @@ _**Note:** All injections configured this way will be shared!_
 
 [zend-container]: https://docs.zendframework.com/zend-expressive/v3/features/container/config/
 
+An existing `Injector` can also be passed into `ContainerFactory`:
+
+```php
+$factory = new ContainerFactory($injector);
+```
+
+This can be combined with `InjectorBuilder` or `LazyInjectorBuilder` to apply
+configuration such as `define()` calls.
+
 ### Identifiers
 
 [PSR-11][psr-11] does not require the container identifier to be a class name, while [Auryn][auryn] does.
