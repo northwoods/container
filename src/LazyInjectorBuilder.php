@@ -27,19 +27,15 @@ class LazyInjectorBuilder
             $injector = new Injector();
         }
 
-        $configs = $this->makeConfigs($injector);
-        $builder = new InjectorBuilder($configs);
+        foreach ($this->configs as $config) {
+            $this->makeConfig($injector, $config)->apply($injector);
+        }
 
-        return $builder->build($injector);
+        return $injector;
     }
 
-    private function makeConfigs(Injector $injector): array
+    private function makeConfig(Injector $injector, string $config): InjectorConfig
     {
-        return array_map(
-            static function (string $config) use ($injector): InjectorConfig {
-                return $injector->make($config);
-            },
-            $this->configs
-        );
+        return $injector->make($config);
     }
 }
