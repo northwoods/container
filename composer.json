@@ -17,9 +17,10 @@
     },
     "require-dev": {
         "eloquent/phony-phpunit": "^4.0",
+        "eloquent/phpstan-phony": "^0.2.0",
+        "phpstan/phpstan": "^0.10.1",
         "phpunit/phpunit": "^7.0.3",
         "squizlabs/php_codesniffer": "^3.2",
-        "vimeo/psalm": "^1.0.5",
         "zendframework/zend-container-config-test": "^0.2.0"
     },
     "autoload": {
@@ -38,7 +39,7 @@
             "@sa-check"
         ],
         "cs-check": "phpcs --standard=PSR2 src/ tests/",
-        "sa-check": "psalm",
+        "sa-check": "phpstan analyse -l max -c phpstan.neon src --no-progress",
         "test": "phpunit"
     },
     "config": {

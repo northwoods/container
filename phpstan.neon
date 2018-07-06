@@ -1,0 +1,2 @@
+includes:
+  - vendor/eloquent/phpstan-phony/phony.neon
