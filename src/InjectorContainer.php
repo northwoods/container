@@ -6,8 +6,9 @@ namespace Northwoods\Container;
 use Auryn\Injector;
 use Auryn\InjectorException;
 use Psr\Container\ContainerInterface;
+use Interop\Container\ContainerInterface as InteropContainerInterface;
 
-class InjectorContainer implements ContainerInterface
+class InjectorContainer implements ContainerInterface, InteropContainerInterface
 {
     const I_ALL = 31;
 
